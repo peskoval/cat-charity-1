@@ -1,0 +1,17 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
+
+BASE_DIR = Path(__file__).parent.parent
+
+
+class Settings(BaseSettings):
+    app_title: str = 'Благотворительный фонд поддержки котиков QRKot'
+    app_description: str = 'Сервис для поддержки котиков'
+    database_url: str | None = None
+    model_config = SettingsConfigDict(
+        env_file='.env',
+        env_file_encoding='utf-8',
+    )
+
+
+settings = Settings()
