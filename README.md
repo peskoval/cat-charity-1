@@ -2,18 +2,14 @@
  финальное задание 23 спринта
 
 ### QRKot реализован с использованием:
-  - Django
-  - Django Rest Framework
-  - Nginx
-  - PostgreSQL/SQLite
-  - Docker
+  - FstAPI
 
 ### Как развернуть проект:
 
 Клонировать репозиторий и перейти в папку бэкенда проекта:
 ```bash
-git clone https://github.com/peskoval/foodgram.git
-cd foodgram/backend/
+git clone https://github.com/peskoval/cat-charity-1.git
+cd cat-charity-1
 ```
 
 Cоздать и активировать виртуальное окружение:
@@ -27,62 +23,18 @@ source .venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-##### Для SQLite
-```bash
-export USE_SQLITE=true
-```
-
-##### Для PostgreSQL (по умолчанию)
-```bash
-unset USE_SQLITE
-```
-
-Применение миграций, сборка статики и запуск сервера:
-```bash
-python3 manage.py migrate
-python3 manage.py collectstatic
-python3 manage.py runserver
-```
-Наполнить базу ингредиентами и тегами:
-```bash
-python3 manage.py load_ingredients ../data/ingredients.json
-python3 manage.py load_tags ../data/tags.json
-
-```
-
-
-#### Запуск проекта в Docker:
+#### Запуск проекта:
 Создать файл .env в корне проекта со следующей структурой:
-```env
-POSTGRES_USER=Имя пользователя для подклчения к базе
-POSTGRES_PASSWORD=Пароль пользователя для подключения к базе
-POSTGRES_DB=Название базы
-DB_HOST=Хост базы данных
-DB_PORT=Порт
-DB_NAME=Название базы
-SECRET_KEY=Секретный ключ для проекта
-ALLOWED_HOSTS=Список разрешенных хостов
-DEBUG=Режим разработки True/False
+```.env
+APP_TITLE='Благотворительный фонд поддержки котиков QRKot'
+APP_DESCRIPTION='Сервис для поддержки котиков'
+DATABASE_URL=sqlite+aiosqlite:///./fastapi.db 
 ```
 
-Запустить Docker Desktop;
-Запустить docker-compose:
+Запустить проект:
 ```bash
-docker compose -f docker-compose.production.yml up
+uvicorn app.main:app --reload
 ```
-
-### Доступные эндпоинты в API
-
-[Панель администрирования](localhost/admin/)
-[Ингредиенты](localhost/api/ingredients/)
-[Рецепты](localhost/api/recipes/)
-[Короткая ссылка на рецепт](localhost/api/recipes/{id}/get-link/)
-[Избранные рецепты](localhost/api/recipes/{id}/favorite/)
-[Загрузка файла со списком покупок](localhost/api/recipes/download_shopping_cart/)
-[Теги](localhost/api/tags/)
-[Пользователи](localhost/api/users/)
-[Подписки](localhost/api/users/subscriptions/)
-[Документация](localhost/api/docs/)
 
 ---
 Автор: Peskoval (Пескова Александра Олеговна)
