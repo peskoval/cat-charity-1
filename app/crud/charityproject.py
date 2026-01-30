@@ -1,16 +1,12 @@
 from typing import Optional
-from fastapi.encoders import jsonable_encoder
 
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.charity_project import CharityProject
-from app.schemas.charityproject import (
-    CharityProjectUpdate,
-)
-
-
 from app.crud.base import CRUDBase
+from app.models.charity_project import CharityProject
+from app.schemas.charityproject import CharityProjectUpdate
 
 
 class CRUDCharityProject(CRUDBase):

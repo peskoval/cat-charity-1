@@ -69,7 +69,7 @@ async def get_active_projects(
         .where(
             CharityProject.close_date.is_(None),
             CharityProject.fully_invested.is_(False),
-            )
+        )
         .order_by(asc(CharityProject.create_date))
     )
     return active_projects.scalars().all()

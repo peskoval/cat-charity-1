@@ -13,7 +13,7 @@ from app.core.constants import DEFAULT_INVESTED_AMOUNT
 
 
 class DonationBase(BaseModel):
-    comment: Optional[str] = Field(None,)
+    comment: Optional[str] = Field(None)
     full_amount: PositiveInt
 
     model_config = ConfigDict(extra='forbid')
