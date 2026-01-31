@@ -39,7 +39,7 @@ async def check_new_project_amount(
     project = await charity_project_crud.get_project_by_id(project_id, session)
     if project.invested_amount > new_full_amount:
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail=WRONG_AMOUNT,
         )
 

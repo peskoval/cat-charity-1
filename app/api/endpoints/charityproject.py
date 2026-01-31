@@ -76,6 +76,7 @@ async def partially_update_project(
     project = await charity_project_crud.update_project(
         project, project_in, session
     )
+    print(project)
     return project
 
 
