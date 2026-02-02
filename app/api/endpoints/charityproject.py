@@ -1,9 +1,11 @@
 from typing import Annotated
+from datetime import datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.validators import (
+    check_empty_project,
     check_name_duplicate,
     check_new_project_amount,
     check_project_exists,
@@ -76,6 +78,12 @@ async def partially_update_project(
     project = await charity_project_crud.update_project(
         project, project_in, session
     )
+    if project.invested_amount == project.full_amount:
+        project.fully_invested = True
+        project.close_date = datetime.utcnow()
+        session.add(project)
+        await session.commit()
+        await session.refresh(project)
     return project
 
 
@@ -84,7 +92,6 @@ async def partially_update_project(
     response_model=CharityProjectDB,
     response_model_exclude_none=True,
     description=(
-        'Удалить целевой проект. '
         'Нельзя удалить проект, в который уже были инвестированы средства.'
     ))
 async def remove_project(
@@ -93,5 +100,6 @@ async def remove_project(
 ):
     project = await check_project_exists(project_id, session)
     await check_project_status(project_id, session)
+    await check_empty_project(project_id, session)
     project = await charity_project_crud.delete_project(project, session)
     return project
