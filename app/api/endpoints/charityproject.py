@@ -92,6 +92,7 @@ async def partially_update_project(
     response_model=CharityProjectDB,
     response_model_exclude_none=True,
     description=(
+        'Удалить целевой проект. '
         'Нельзя удалить проект, в который уже были инвестированы средства.'
     ))
 async def remove_project(
