@@ -1,13 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    PositiveInt,
-    NonNegativeInt,
-)
+from pydantic import BaseModel, ConfigDict, Field, NonNegativeInt, PositiveInt
 
 from app.core.constants import DEFAULT_INVESTED_AMOUNT
 

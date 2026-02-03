@@ -1,5 +1,5 @@
-from typing import Annotated
 from datetime import datetime
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,16 +9,17 @@ from app.api.validators import (
     check_name_duplicate,
     check_new_project_amount,
     check_project_exists,
-    check_project_status,
+    check_project_status
 )
 from app.core.db import get_async_session
 from app.crud.charityproject import charity_project_crud
+from app.crud.donation import donation_crud
 from app.schemas.charityproject import (
     CharityProjectCreate,
     CharityProjectDB,
     CharityProjectUpdate,
 )
-from app.services.investitions import invest_to_new_project
+from app.services.investitions import invest_donation
 
 router = APIRouter()
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
@@ -34,8 +35,20 @@ async def create_new_charity_project(
     session: SessionDep,
 ):
     await check_name_duplicate(project.name, session)
-    project = await charity_project_crud.create(project, session)
-    invested_project = await invest_to_new_project(project, session)
+    project_obj = await charity_project_crud.create(
+        project,
+        session,
+        commit=False,
+    )
+    active_donations = await donation_crud.get_active_objects(session)
+    invested_project, invested_donations = invest_donation(
+        project_obj,
+        active_donations,
+    )
+    for donation in invested_donations:
+        session.add(donation)
+    await session.commit()
+    await session.refresh(invested_project)
     return invested_project
 
 
@@ -75,15 +88,15 @@ async def partially_update_project(
             project_id, project_in.full_amount, session
         )
     await check_project_status(project_id, session)
-    project = await charity_project_crud.update_project(
-        project, project_in, session
+    project = await charity_project_crud.update(
+        project, project_in, session, commit=False
     )
     if project.invested_amount == project.full_amount:
         project.fully_invested = True
         project.close_date = datetime.utcnow()
-        session.add(project)
-        await session.commit()
-        await session.refresh(project)
+
+    await session.commit()
+    await session.refresh(project)
     return project
 
 
@@ -102,5 +115,6 @@ async def remove_project(
     project = await check_project_exists(project_id, session)
     await check_project_status(project_id, session)
     await check_empty_project(project_id, session)
-    project = await charity_project_crud.delete_project(project, session)
+    project = await charity_project_crud.remove(project, session, commit=False)
+    await session.commit()
     return project

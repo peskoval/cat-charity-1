@@ -4,14 +4,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
+from app.crud.charityproject import charity_project_crud
 from app.crud.donation import donation_crud
-from app.schemas.donation import (
-    DonationCreate,
-    DonationDB,
-    DonationFullInfoDB,
-)
+from app.schemas.donation import DonationCreate, DonationDB, DonationFullInfoDB
 from app.services.investitions import invest_donation
-
 
 router = APIRouter()
 SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
@@ -26,9 +22,17 @@ async def create_donation(
     donation: DonationCreate,
     session: SessionDep,
 ):
-    donation = await donation_crud.create(donation, session)
-    invested_donation = await invest_donation(donation, session)
-    return invested_donation
+    donation_obj = await donation_crud.create(donation, session, commit=False)
+    active_projects = await charity_project_crud.get_active_objects(session)
+    invested_donation, invested_projects = invest_donation(
+        donation_obj,
+        active_projects,
+    )
+    for project in invested_projects:
+        session.add(project)
+    await session.commit()
+    await session.refresh(donation_obj)
+    return donation_obj
 
 
 @router.get(

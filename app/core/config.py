@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).parent.parent
 class Settings(BaseSettings):
     app_title: str = 'Благотворительный фонд поддержки котиков QRKot'
     app_description: str = 'Сервис для поддержки котиков'
-    database_url: str = 'sqlite+aiosqlite:///./fastapi.db'
+    database_url: str = 'sqlite+aiosqlite:///./cat_fund.db'
     model_config = SettingsConfigDict(
         env_file='.env',
         env_file_encoding='utf-8',

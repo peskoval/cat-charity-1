@@ -1,86 +1,31 @@
 from datetime import datetime
 
-from sqlalchemy import select, asc
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.models.charity_project import CharityProject
-from app.models.donation import Donation
+from app.models.base import CharityDonationBase
 
 
-async def invest_donation(
-    donation: Donation,
-    session: AsyncSession,
-) -> Donation:
-    remaining_amount = donation.full_amount - donation.invested_amount
-    projects = await get_active_projects(session)
+def invest_donation(
+    target: CharityDonationBase,
+    sources: CharityDonationBase,
+) -> tuple[CharityDonationBase, list]:
+    target_invested = target.invested_amount or 0
+    remaining_amount = target.full_amount - target_invested
 
-    for project in projects:
-        needed_amount = project.full_amount - project.invested_amount
+    for source in sources:
+        if remaining_amount <= 0:
+            break
+        source_invested = source.invested_amount or 0
+        needed_amount = source.full_amount - source_invested
         to_invest = min(needed_amount, remaining_amount)
 
-        project.invested_amount += to_invest
-        if project.invested_amount == project.full_amount:
-            project.fully_invested = True
-            project.close_date = datetime.utcnow()
-
-        donation.invested_amount += to_invest
+        source.invested_amount = source_invested + to_invest
+        target.invested_amount = target_invested + to_invest
         remaining_amount -= to_invest
+        if source.invested_amount == source.full_amount:
+            source.fully_invested = True
+            source.close_date = datetime.utcnow()
 
-    if donation.invested_amount == donation.full_amount:
-        donation.fully_invested = True
-        donation.close_date = datetime.utcnow()
-    session.add(donation)
-    await session.commit()
-    await session.refresh(donation)
-    return donation
+    if target.invested_amount == target.full_amount:
+        target.fully_invested = True
+        target.close_date = datetime.utcnow()
 
-
-async def invest_to_new_project(
-    project: CharityProject,
-    session: AsyncSession,
-) -> CharityProject:
-    donations = await get_active_donations(session)
-    if not donations:
-        return project
-    remaining_needed = project.full_amount - project.invested_amount
-    for donation in donations:
-        available_amount = donation.full_amount - donation.invested_amount
-        to_invest = min(available_amount, remaining_needed)
-        donation.invested_amount += to_invest
-        if donation.invested_amount >= donation.full_amount:
-            donation.fully_invested = True
-            donation.close_date = datetime.utcnow()
-        project.invested_amount += to_invest
-        remaining_needed -= to_invest
-    if project.invested_amount >= project.full_amount:
-        project.fully_invested = True
-        project.close_date = datetime.utcnow()
-    session.add(project)
-    await session.commit()
-    await session.refresh(project)
-    return project
-
-
-async def get_active_projects(
-    session: AsyncSession
-) -> list[CharityProject]:
-    active_projects = await session.execute(
-        select(CharityProject)
-        .where(
-            CharityProject.close_date.is_(None),
-            CharityProject.fully_invested.is_(False),
-        )
-        .order_by(asc(CharityProject.create_date))
-    )
-    return active_projects.scalars().all()
-
-
-async def get_active_donations(
-    session: AsyncSession
-) -> list[Donation]:
-    donations = await session.execute(
-        select(Donation)
-        .where(Donation.fully_invested.is_(False))
-        .order_by(asc(Donation.create_date))
-    )
-    return donations.scalars().all()
+    return target, sources

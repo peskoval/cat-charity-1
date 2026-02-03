@@ -3,16 +3,12 @@ import os
 from logging.config import fileConfig
 
 from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine, async_engine_from_config
 
 from alembic import context
-
 from app.core.base import Base
-
 
 load_dotenv('.env')
 
