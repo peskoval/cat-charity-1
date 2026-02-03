@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.constants import MAX_NAME_LENGTH
 
-from .base import CharityDonationBase, CommonMixin
+from app.models.base import CharityDonationBase, CommonMixin
 
 
 class CharityProject(CommonMixin, CharityDonationBase):
