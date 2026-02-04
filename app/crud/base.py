@@ -25,7 +25,6 @@ class CRUDBase:
         db_obj = self.model(
             **obj_in_data,
             invested_amount=0,
-            fully_invested=False,
         )
         session.add(db_obj)
         if commit:

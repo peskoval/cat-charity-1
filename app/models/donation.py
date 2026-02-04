@@ -10,4 +10,6 @@ class Donation(InvestitionBase):
     comment: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
-        return super().__repr__()
+        return (
+            f'{super().__repr__()}, comment={self.comment}'
+        )

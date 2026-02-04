@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Integer, CheckConstraint
+from sqlalchemy import Boolean, DateTime, Integer, CheckConstraint, and_, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import CommonBase
@@ -14,10 +14,10 @@ class InvestitionBase(CommonBase):
             'full_amount > 0', name='check_full_amount_positive'
         ),
         CheckConstraint(
-            'invested_amount >= 0', name='check_invested_amount_non_negative'
-        ),
-        CheckConstraint(
-            'invested_amount <= full_amount', name='check_invested_<=_full'
+            and_(
+                text('invested_amount >= 0'),
+                text('invested_amount <= full_amount')
+            ),
         ),
     )
     full_amount: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -37,8 +37,10 @@ class InvestitionBase(CommonBase):
 
     def __repr__(self):
         return (
-            f'{self.__class__.__name__}(id={self.id}, '
+            f'{super().__repr__()}, '
             f'full_amount={self.full_amount}, '
             f'invested_amount={self.invested_amount}, '
-            f'fully_invested={self.fully_invested})'
+            f'fully_invested={self.fully_invested}, '
+            f'create_date={self.create_date}, '
+            f'close_date={self.close_date})'
         )

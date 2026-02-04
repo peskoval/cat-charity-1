@@ -24,7 +24,7 @@ class CommonBase(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     def __repr__(self):
-        return f'{self.__class__.__name__} id={self.id}'
+        return f'{type(self).__name__} id={self.id}'
 
 
 engine = create_async_engine(settings.database_url)
