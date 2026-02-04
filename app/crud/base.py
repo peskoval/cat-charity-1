@@ -22,7 +22,11 @@ class CRUDBase:
         commit: bool = True,
     ):
         obj_in_data = obj_in.dict()
-        db_obj = self.model(**obj_in_data)
+        db_obj = self.model(
+            **obj_in_data,
+            invested_amount=0,
+            fully_invested=False,
+        )
         session.add(db_obj)
         if commit:
             await session.commit()

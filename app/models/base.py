@@ -1,24 +1,25 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Integer
-from sqlalchemy.orm import Mapped, declared_attr, mapped_column
+from sqlalchemy import Boolean, DateTime, Integer, CheckConstraint
+from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
-
-
-class CommonMixin():
-
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+from app.core.db import CommonBase
 
 
-class CharityDonationBase(Base):
+class InvestitionBase(CommonBase):
     __abstract__ = True
-
+    __table_args__ = (
+        CheckConstraint(
+            'full_amount > 0', name='check_full_amount_positive'
+        ),
+        CheckConstraint(
+            'invested_amount >= 0', name='check_invested_amount_non_negative'
+        ),
+        CheckConstraint(
+            'invested_amount <= full_amount', name='check_invested_<=_full'
+        ),
+    )
     full_amount: Mapped[int] = mapped_column(Integer, nullable=False)
     invested_amount: Mapped[int] = mapped_column(
         Integer, default=0, nullable=False
@@ -33,3 +34,11 @@ class CharityDonationBase(Base):
         DateTime,
         nullable=True
     )
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__name__}(id={self.id}, '
+            f'full_amount={self.full_amount}, '
+            f'invested_amount={self.invested_amount}, '
+            f'fully_invested={self.fully_invested})'
+        )
