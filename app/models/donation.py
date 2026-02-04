@@ -10,4 +10,8 @@ class Donation(InvestitionBase):
     comment: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
-        return f'{super().__repr__()}, comment={self.comment}'
+        parts = [
+            super().__repr__(),
+            f'comment={self.comment}, '
+        ]
+        return ', '.join(parts)
