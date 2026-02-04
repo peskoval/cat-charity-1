@@ -16,8 +16,9 @@ class CharityProject(InvestitionBase):
     description: Mapped[str] = mapped_column(Text, nullable=False)
 
     def __repr__(self) -> str:
-        return (
-            f'{super().__repr__()}, '
+        parts = [
+            super().__repr__(),
             f'name={self.name}, '
-            f'description={self.description})'
-        )
+            f'description={self.description}'
+        ]
+        return ', '.join(parts)
